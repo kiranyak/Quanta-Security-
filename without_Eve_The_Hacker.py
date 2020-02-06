@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#export PYTHONUNBUFFERED=1
 # coding: utf-8
 
 
@@ -14,10 +15,25 @@ import numpy as np
 # Import Qiskit
 from qiskit import BasicAer, execute
 from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
+from time import sleep
 
+CRED    = '\033[31m'
+CGREEN  = '\033[32m'
+CYELLOW = '\033[33m'
+CBLUE   = '\033[34m'
+CVIOLET = '\033[35m'
+CEND = '\033[0m'
 
 #Super secret message
-mes = input("Enter your secret message: ")
+print('')
+print('')
+print(CGREEN + "******" + CEND + CYELLOW + " Starting Quantum Program " + CEND + CGREEN + "******" + CEND )
+print('')
+print('')
+mes = input( CVIOLET + "Enter your secret message: " + CVIOLET)
+print('')
+print('')
+sleep(1)
 
 #initial size of key
 n = len(mes)*3
@@ -29,7 +45,7 @@ for i in range(int(n/10)):
 if n%10 != 0:
     nlist.append(n%10)
 
-print('Initial key length: ',n)
+print(CGREEN +'Initial key length: ' + CEND ,n )
 
 # Make random strings of length string_length
 
@@ -70,15 +86,24 @@ def randomStringGen(string_length):
 
 
 key = randomStringGen(n)
-print('Initial key: ',key)
+print('')
+print(CGREEN + "******" + CEND + CYELLOW + " generate random rotation strings for Alice and Bob " + CEND + CGREEN + "******" + CEND )
+print('')
+print(CGREEN + 'Initial key: ' + CEND ,key, flush = True)
 
 #generate random rotation strings for Alice and Bob
 Alice_rotate = randomStringGen(n)
 Bob_rotate = randomStringGen(n)
-print("Alice's rotation string:",Alice_rotate)
-print("Bob's rotation string:  ",Bob_rotate)
+print(CGREEN + "Alice's rotation string:" + CEND,Alice_rotate, flush = True)
+
+sleep(3)
+print(CYELLOW + "Bob's rotation string:  " + CEND,Bob_rotate, flush = True)
 
 #start up your quantum program
+print('')
+print(CGREEN + "******" + CEND + CYELLOW + " Starting up " + CEND + CGREEN + "******" + CEND )
+print('')
+
 backend = BasicAer.get_backend('qasm_simulator')  
 shots = 1
 circuits = ['send_over']
@@ -121,8 +146,9 @@ for ind,l in enumerate(nlist):
     counts_so = result_so.get_counts(send_over)
     result_key_so = list(result_so.get_counts(send_over).keys())
     Bob_result += result_key_so[0][::-1]
-    
-print("Bob's results: ", Bob_result)
+
+sleep(3)
+print(CYELLOW + "Bob's results: " + CEND, Bob_result, flush = True)
 
 
 def makeKey(rotation1,rotation2,results):
@@ -137,8 +163,9 @@ def makeKey(rotation1,rotation2,results):
 Akey = makeKey(Bob_rotate,Alice_rotate,key)
 Bkey = makeKey(Bob_rotate,Alice_rotate,Bob_result)
 
-print("Alice's key:",Akey)
-print("Bob's key:  ",Bkey)
+sleep(2)
+print( CGREEN + "Alice's key:" + CEND,Akey, flush = True)
+print( CYELLOW + "Bob's key:  " + CEND,Bkey, flush = True)
 
 
 #make key same length has message
@@ -149,19 +176,30 @@ encoded_m=''
 for m,k in zip(mes,shortened_Akey):
     encoded_c = chr(ord(m) + 2*ord(k) % 256)
     encoded_m += encoded_c
-print('encoded message:  ',encoded_m.encode("utf-8"))
+
+sleep(2)
+print('')
+print(CGREEN + "******" + CEND + CYELLOW + " Encrypting the message using encryption key" + CEND + CGREEN + "******" + CEND )
+print('')
+print(CGREEN + 'encoded message:  ' + CEND,encoded_m.encode("utf-8"), flush = True)
 
 #make key same length has message
 shortened_Bkey = Bkey[:len(mes)]
+
 
 #decrypt message mes using encryption key final_key
 result = ''
 for m,k in zip(encoded_m,shortened_Bkey):
     encoded_c = chr(ord(m) - 2*ord(k) % 256)
     result += encoded_c
-print('recovered message:',result)
 
-
+sleep(2) 
+print('')
+print(CGREEN + "******" + CEND + CYELLOW + "Decrypting the message " + CEND + CGREEN + "******" + CEND )
+print('')
+print('')
+print(CYELLOW + 'Message received by Bob:' + CEND,result, flush = True)
+print('')
 #start up your quantum program
 backend = BasicAer.get_backend('qasm_simulator')  
 shots = 1
@@ -238,13 +276,13 @@ for ind,l in enumerate(nlist):
     Bob_badresult += result_key_eve[0][::-1]
     
 #print("Bob's previous results (w/o Eve):",Bob_result)
-print("Bob's results from Eve:\t\t ",Bob_badresult)
+#print("Bob's results from Eve:\t\t ",Bob_badresult)
 
 #make keys for Alice and Bob
 Akey = makeKey(Bob_rotate,Alice_rotate,key)
 Bkey = makeKey(Bob_rotate,Alice_rotate,Bob_result)
-print("Alice's key:   ",Akey)
-print("Bob's key:     ",Bkey)
+#print("Alice's key:   ",Akey)
+#print("Bob's key:     ",Bkey)
 
 check_key = randomStringGen(len(Akey))
 #print('spots to check:',check_key)
@@ -263,7 +301,9 @@ for i,j in zip(Alice_rotate,Akey):
         sub_Akey += Akey[count]
         sub_Arotate += Alice_keyrotate[count]
     count += 1
-
+print('')
+print(CGREEN + "******" + CEND + CYELLOW + "Detecting the presence of Eve" + CEND + CGREEN + "******" + CEND )
+print('')
 #extract a subset of Bob's key
 sub_Bkey = ''
 sub_Brotate = ''
@@ -273,10 +313,18 @@ for i,j in zip(Bob_rotate,Bkey):
         sub_Bkey += Bkey[count]
         sub_Brotate += Bob_keyrotate[count]
     count += 1
-print("subset of Alice's key:",sub_Akey)
-print("subset of Bob's key:  ",sub_Bkey)
+
+sleep(3)
+print(CGREEN + "subset of Alice's key:" + CEND, sub_Akey, flush = True)
+print(CYELLOW + "subset of Bob's key:  " + CEND ,sub_Bkey, flush = True)
+print('')
+print('')
 
 #compare Alice and Bob's key subsets
+print('')
+print(CGREEN + "******" + CEND + CYELLOW + "Comparing Alice and Bob's key subsets " + CEND + CGREEN + "******" + CEND )
+print('')
+sleep(5)
 secure = True
 for i,j in zip(sub_Akey,sub_Bkey):
     if i == j:
@@ -285,11 +333,16 @@ for i,j in zip(sub_Akey,sub_Bkey):
         secure = False
         break;
 if not secure:
-    print('Eve detected!')
+    print(CRED + 'Eve detected!' + CRED, flush = True)
 else:
-    print('No Eve-The Hacker Present in your communication Channel.!')
+    print(CGREEN + 'No Eve-The Hacker Present in your communication Channel.!' + CEND, flush = True)
 
 #sub_Akey and sub_Bkey are public knowledge now, so we remove them from Akey and Bkey
-if secure:
-    print("Restart the program for sending new message!! ")
+#if secure:
+    #print("Restart the program for sending new message!! ", flush = True)
 
+sleep(1)
+print('')
+print('')
+print(CGREEN + "******" + CEND + CYELLOW + " Ending Quantum Program !! Thank you!! " + CEND + CGREEN + "******" + CEND, flush = True )
+sleep(1)
